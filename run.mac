@@ -1,0 +1,5 @@
+/gun/angtype iso
+
+/gun/rotateY 90.0
+
+/run/beamOn 10
