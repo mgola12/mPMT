@@ -1,0 +1,9 @@
+/vis/open OGL
+/vis/drawVolume
+/vis/scene/add/axes
+/vis/scene/add/volume
+/vis/sceneHandler/attach
+/vis/viewer/set/autoRefresh true
+/vis/scene/endOfEventAction accumulate
+/vis/scene/add/trajectories smooth
+  
