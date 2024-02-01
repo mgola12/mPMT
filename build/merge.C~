@@ -1,0 +1,22 @@
+#include <iostream>
+#include <string>
+#include "TFileMerger.h"
+
+void MergeRootFiles(const std::string& inputPattern, const std::string& outputFile)
+{
+  TFileMerger merger;
+  merger.OutputFile(outputFile.c_str());
+  merger.AddFile(inputPattern.c_str());
+  merger.Merge();
+}
+
+int main()
+{
+  std::string inputPattern = "output*.root"; // Replace with the appropriate pattern for your root files                    
+  std::string outputFile = "merged.root";  // Specify the name of the output merged file                                   
+
+  MergeRootFiles(inputPattern, outputFile);
+
+  std::cout << "Root files merged successfully." << std::endl;
+  return 0;
+}
