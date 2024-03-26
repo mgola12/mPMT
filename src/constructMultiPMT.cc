@@ -676,7 +676,7 @@ G4double ABSORPTION_skAcrylic[306] =
 						   logicmPMT,
 						   false,
 						   i,
-  						   false);
+  						   true);
   }
   
   
