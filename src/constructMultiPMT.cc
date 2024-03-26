@@ -7,6 +7,7 @@ Author:    Mohit Gola 10th July 2023
 #include "WCSimTuningParameters.hh"
 #include <string>
 #include <sstream>
+
 ConstructMultiPMT::ConstructMultiPMT(myDetectorConstruction* detectorConstruction, G4LogicalVolume* logicPMT) : detectorConstruction(detectorConstruction), logicPMT(logicPMT) {}
 
 ConstructMultiPMT::~ConstructMultiPMT() {}
@@ -541,13 +542,14 @@ G4double ABSORPTION_skAcrylic[306] =
 
   
   G4VPhysicalVolume *physMatrix = new G4PVPlacement(0,
-                                                   G4ThreeVector(0.,0.,-292.505*mm),
-                                                   matrixLogic,
-                                                   "physMatrix",
-                                                   logicmPMT,
-                                                   false,
-                                                   0,
-                                                   true);  
+						    G4ThreeVector(0.,0.,-298.*mm),
+						    //G4ThreeVector(0.,0.,-288.5*mm),
+						    matrixLogic,
+						    "physMatrix",
+						    logicmPMT,
+						    false,
+						    0,
+						    true);  
   
   
   G4Tubs *flangeSolid = new G4Tubs("flangeSolid",
@@ -561,7 +563,7 @@ G4double ABSORPTION_skAcrylic[306] =
                                                      "flangeLogic");
   
   G4VPhysicalVolume *physFlange = new G4PVPlacement(0,
-                                                   G4ThreeVector(0.,0.,-106.6*mm),
+                                                   G4ThreeVector(0.,0.,-112.*mm),
                                                    flangeLogic,
                                                    "physFlange",
                                                    logicmPMT,
@@ -584,7 +586,7 @@ G4double ABSORPTION_skAcrylic[306] =
 
   
   G4VPhysicalVolume *physDome = new G4PVPlacement(0,
-						  G4ThreeVector(0.,0.,-278.9*mm),
+						  G4ThreeVector(0.,0.,-273.6*mm),
 						  domeLogic,
 						  "physDome",
 						  logicmPMT,
@@ -612,7 +614,7 @@ G4double ABSORPTION_skAcrylic[306] =
 						       "flangeLogic");
   
   G4VPhysicalVolume *physCylinder = new G4PVPlacement(0,
-						    G4ThreeVector(0.,0.,-123.6*mm),
+						    G4ThreeVector(0.,0.,-116.4*mm),
 						    cylinderLogic,
 						    "physCylinder",
 						    logicmPMT,
@@ -633,15 +635,15 @@ G4double ABSORPTION_skAcrylic[306] =
   
   G4int numPMTs = 19;
   
-  G4double xArray[] ={0.*mm, 82.43*mm, 41.21*mm, -41.21*mm, -82.43*mm, -41.21*mm, 41.21*mm, 153.109*mm, 132.59*mm, 76.55*mm, 0.*mm, -76.55*mm, -132.59*mm, -153.109*mm, -132.59*mm, -76.55*mm, 0.*mm, 76.55*mm, 132.59*mm};
+  G4double xArray[] ={0.*mm, 84.43*mm, 42.21*mm, -42.21*mm, -84.43*mm, -42.21*mm, 42.21*mm, 155.109*mm, 134.32*mm, 77.55*mm, 0.*mm, -77.55*mm, -134.32*mm, -155.109*mm, -134.32*mm, -77.55*mm, 0.*mm, 77.55*mm, 134.32*mm};
 
-  G4double yArray[] = {0.*mm, 0.*mm, -71.39*mm, -71.39*mm, 0.*mm, 71.39*mm, 71.39*mm, 0.*mm, -76.55*mm, -132.59*mm, -153.109*mm, -132.59*mm, -76.55*mm, 0.*mm, 76.55*mm, 132.59*mm, 153.109*mm, 132.59*mm, 76.55*mm};
+  G4double yArray[] = {0.*mm, 0.*mm, -73.125*mm, -73.125*mm, 0.*mm, 73.125*mm, 73.125*mm, 0.*mm, -77.55*mm, -134.32*mm, -155.109*mm, -134.32*mm, -77.55*mm, 0.*mm, 77.55*mm, 134.32*mm, 155.109*mm, 134.32*mm, 77.55*mm};
 
-  G4double zArray[] = {0.*mm, -13.225*mm, -13.225*mm, -13.225*mm, -13.225*mm, -13.225*mm, -13.225*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm, -48.7*mm};
+  G4double zArray[] = {0.*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm};
 
-  G4double xthetaArray[] = {0.*deg, 0.*deg, 15.8353*deg, 15.8353*deg, 0.*deg, -15.8353*deg, -15.8353*deg, 0.*deg, 19.5049*deg, 31.5299*deg, 35.3149*deg, 31.5299*deg, 19.5049*deg, 0.*deg, -19.5049*deg, -31.5299*deg, -35.3149*deg, -31.5299*deg, -19.5049*deg};
+  G4double xthetaArray[] = {0.*deg, 0.*deg, 16.24*deg, 16.24*deg, 0.*deg, -16.24*deg, -16.24*deg, 0.*deg, 19.861*deg, 32.03*deg, 35.846*deg, 32.03*deg, 19.861*deg, 0.*deg, -19.861*deg, -32.03*deg, -35.846*deg, -32.03*deg, -19.861*deg};
 
-  G4double ythetaArray[] = {0.*deg, 18.1345*deg, 9.3001*deg, -9.3001*deg, -18.1345*deg, -9.3001*deg, 9.3001*deg, 35.3149*deg, 31.5299*deg, 19.5049*deg, 0.*deg, -19.5049*deg, -31.5299*deg, -35.3149*deg, -31.5299*deg, -19.5049*deg, 0.*deg, 19.5049*deg, 31.5299*deg};
+  G4double ythetaArray[] = {0.*deg, 18.59*deg, 9.54*deg, -9.54*deg, -18.59*deg, -9.54*deg, 9.54*deg, 35.84*deg, 32.03*deg, 19.861*deg, 0.*deg, -19.861*deg, -32.03*deg, -35.846*deg, -32.03*deg, -19.861*deg, 0.*deg, 19.861*deg, 32.03*deg};
 
   G4double phiArray[] = {0.*deg, 0.*deg, -60.*deg, -120.*deg, 180.*deg, 120.*deg, 60*deg, 0.*deg, -30.*deg, -60.*deg, -90.*deg, -120.*deg, -150.*deg, 180.*deg, 150.*deg, 120.*deg, 90.*deg, 60.*deg, 30.*deg};
 

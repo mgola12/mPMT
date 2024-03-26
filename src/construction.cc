@@ -638,40 +638,44 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   G4double pmtConeHeight = 20.0*mm;
 
   ///////////////////////////////Defining World Volume/////////////////////////////////
-  /*
-  G4Sphere *mainSolid = new G4Sphere("mainSolid",
-                                    339.9*mm,
-                                    340.*mm,
-                                    0.0*deg, 360.0*deg,
-                                    0.0, 8.02*deg);
+  G4double zPlanesCylinder[2] = {28.705, 54.4};
+  G4double rInnerCylinder[2] = {0, 0};
+  G4double rOuterCylinder[2] = {44.5, 47.5};
+  G4Polycone* solidWorldCylinder = new G4Polycone("solidWorld",
+						  0,
+						  2 * M_PI,
+						  2,
+						  zPlanesCylinder,
+						  rInnerCylinder,
+						  rOuterCylinder);
+					
+  G4double zPlanesCone[2] = {-20.2, 28.705};
+  G4double rInnerCone[2] = {0, 0};
+  G4double rOuterCone[2] = {35.22, 44.5};
+  G4Polycone* solidWorldCone = new G4Polycone("solidWorld",
+					      0,
+					      2 * M_PI,
+					      2,
+					      zPlanesCone,
+					      rInnerCone,
+					      rOuterCone);
 
-  G4Tubs *coneWorld = new G4Tubs("coneSolid",
-                                  46.9*mm,
-                                  47*mm,
-                                  51.*mm,
-                                  0.*deg, 360.*deg);
-
-  G4UnionSolid *motherSolid = new G4UnionSolid("motherSolid",
-					       coneWorld,
-					       mainSolid,
-					       0,
-					       G4ThreeVector(0.,0.,-286.*mm));
-  */
-
+  G4UnionSolid* combinedWorld = new G4UnionSolid("combineWorld", solidWorldCylinder, solidWorldCone);
+  
   ////////////////////////////////////////////////////////////////////////////////////
   
-  G4Box *solidWorld = new G4Box("solidWorld", 50*mm, 50*mm, 53*mm);
-  //  G4Box *solidWorld = new G4Box("solidWorld", .25*m, .25*m, .25*m);
+  //  G4Box *solidWorld = new G4Box("solidWorld", 50*mm, 50*mm, 100*mm);
+
   
   G4LogicalVolume *logicWorld = new G4LogicalVolume(//solidWorld,
-						    solidWorld,
+						    combinedWorld,
 						    //Air, 
 						    Water,
 						    "logicWorld");
    
-  G4VisAttributes* invisible = new G4VisAttributes(false);
-  logicWorld->SetVisAttributes(invisible);
-  logicWorld->SetSensitiveDetector(NULL);
+  //  G4VisAttributes* invisible = new G4VisAttributes(false);
+  //  logicWorld->SetVisAttributes(invisible);
+  //  logicWorld->SetSensitiveDetector(NULL);
   
   G4VPhysicalVolume *physWorld = new G4PVPlacement(0, 
 						   G4ThreeVector(0.,0.,0.), 
@@ -760,8 +764,8 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 						 combineSolid1, 
 						 pmtGlass, 
 						 transform);
-  */
   
+  */
   pmtGlassLogic = new G4LogicalVolume(pmtBulb, 
 				      PMTGlass, 
 				      "pmtGlassLogic");
@@ -862,7 +866,6 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   */
   G4Sphere *pmtInnerGlassSolid = new G4Sphere("pmtInnerglassSolid",
 					      0.*mm,
-					      //pmtCylRadius-0.3*mm,
 					      pmtGlassRadius-pmtGlassThickness,
 					      0.0*deg, 360.0*deg,
 					      0.0, 90*deg);
@@ -870,11 +873,11 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 			       pmtGlassRadius+1.*cm,                                                    
 			       pmtGlassRadius+1.*cm,                                             
 			       34.597);
-			       //33.9*mm);   
+
 
   G4SubtractionSolid *pmtInnerGlass = new G4SubtractionSolid("pmtInnerglass",     
-								  pmtInnerGlassSolid,
-                                                                  boxCutOff); 
+							     pmtInnerGlassSolid,
+							     boxCutOff); 
 
   pmtInnerGlassLogic = new G4LogicalVolume(pmtInnerGlass,
 					   Air1,
@@ -912,7 +915,7 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   logicabsorber = new G4LogicalVolume(solidAbsorber, 
 				      absorberMaterial, 
 				      "logicabsorber");
-  
+    
   G4VPhysicalVolume *absorber = new G4PVPlacement(0, 
 						  absorberPosition, 
 						  logicabsorber, 
@@ -1120,7 +1123,7 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
                                                    0,
                                                    true);
   
-  
+						   
   
   
   /////////////////////////Placing Gel//////////////////////////
@@ -1185,17 +1188,19 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
                                     0.0, 8.02*deg);
 
   G4Sphere *pmtGelSolid = new G4Sphere("pmtGelSolid",
-                                         pmtGlassRadius,
-                                         pmtGlassRadius+pmtGlassThickness,
-                                         0.0*deg, 360.0*deg,
-                                         0.0, 49.24*deg);
+                                        0.*mm,
+				       pmtGlassRadius,
+				       0.0*deg, 360.0*deg,
+				       0.0, 90.*deg);
 
-  G4Transform3D transform1(G4Translate3D(0,0,(324.03*mm - (pmtGlassRadius+pmtGlassThickness))));
+  G4Transform3D transform1(G4Translate3D(0,0,(324.03*mm - pmtGlassRadius)));
+  //  G4Transform3D transform1(G4Translate3D(0,0,(324.*mm)));
 
   G4SubtractionSolid *pmtInnerGelSolid = new G4SubtractionSolid("pmtInnergel",
-                                                                  gelSolid,                                        
-                                                                  pmtGelSolid,
-                                                                  transform1);
+								gelSolid,                                        
+								pmtGelSolid,
+								//pmtBulb,
+								transform1);
 
 
 
@@ -1214,8 +1219,8 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   //G4LogicalSkinSurface* gelLogSkinSurface = new G4LogicalSkinSurface("gelLogSkinSurface",gelLogic,OpGelFoamSurface);
   
   G4VPhysicalVolume *gelPlace = new G4PVPlacement(0,                                                                 
-						  //G4ThreeVector(0.,0.,-277.625*mm),   
-						  G4ThreeVector(0.,0.,-279.*mm),
+						  G4ThreeVector(0.,0.,-277.627*mm),   
+						  //G4ThreeVector(0.,0.,-260.*mm),
 						  gelLogic,                                            
 						  "gelPlacce",                 
 						  logicWorld,
@@ -1227,11 +1232,9 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 
   G4Cons *solidCone1 = new G4Cons("Cone1",
 				  27.*mm,
-				  //28.41*mm,
-				  27.41*mm,
+				  27.25*mm,
 				  40.55*mm,
-				  //41.96*mm,
-				  40.96*mm,
+				  40.8*mm,
 				  10.265*mm,
 				  0.*deg, 360.*deg);
 
@@ -1244,11 +1247,11 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
                                   0.*deg, 360.*deg);
 
   G4Tubs *cupTube = new G4Tubs("cupTube",
-                            40.55*mm,
-                            41.96*mm,
-                            9.22*mm,
-                            0.*deg, 360.*deg);
-
+			       40.55*mm,
+			       40.8*mm,
+			       9.22*mm,
+			       0.*deg, 360.*deg);
+  
   G4UnionSolid *combineCupSolid1 = new G4UnionSolid("tubeplusreflection",
                                                  solidCone1,
                                                  cupTube,
@@ -1286,13 +1289,9 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 
   /////////////////Cup Reflector/////////////////////////////
   G4Cons *reflectorSolid = new G4Cons("Cone2",
-                                      //45.72*mm,
 				      43.505*mm,
-                                      //45.97*mm,
 				      43.775*mm,
-                                      //47.76*mm,
 				      45.13*mm,
-                                      //48.01*mm,
 				      45.38*mm,
                                       5.765*mm,
                                       0.*deg, 360.*deg);
@@ -1330,14 +1329,15 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 						    "poronLogic");
   
   G4VPhysicalVolume *poron = new G4PVPlacement(0,                                                                         
-					       G4ThreeVector(0.,0.,-16.615*mm),                                             
+					       //G4ThreeVector(0.,0.,-16.615*mm),  
+					       G4ThreeVector(0.,0.,-15.35*mm),  
 					       poronLogic,                                                                  
 					       "poron",                                                                     
 					       logicWorld,                  
 					       false,                                                                       
 					       0,                                                                           
 					       true);                                                                       
-                                                                                                                   
+                                                                                                                 
   G4VisAttributes *poronAttributes = new G4VisAttributes();                                                               
   poronAttributes->SetColor(1.0, 1.0, 0.0);                                                                               
   poronAttributes->SetVisibility(true);                                                                                   
@@ -1351,5 +1351,7 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 G4VPhysicalVolume *myDetectorConstruction::Construct()
 {
   return nullptr;
+  //  return ConstructPMT();
 
 }
+
