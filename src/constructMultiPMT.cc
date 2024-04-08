@@ -498,6 +498,15 @@ G4double ABSORPTION_skAcrylic[306] =
  myMPT3->AddProperty("EFFICIENCY",   ENERGY_water, EFFICIENCY, NUMENTRIES_water);
  Plastic->SetMaterialPropertiesTable(myMPT3);
 
+ G4OpticalSurface*  PlasticSkinSurface = new G4OpticalSurface("PlasticSurface");
+ PlasticSkinSurface->SetType(dielectric_metal);
+ PlasticSkinSurface->SetModel(unified);
+ PlasticSkinSurface->SetFinish(polished);
+
+ G4MaterialPropertiesTable *plasticMaterial = new G4MaterialPropertiesTable();
+ plasticMaterial->AddProperty("REFLECTIVITY", ENERGY_water, REFLECTIVITY_blacksheet, NUMENTRIES_water);
+ PlasticSkinSurface->SetMaterialPropertiesTable(plasticMaterial);
+
  ///////////////////construct geometry/////////////////////
  
   //  WCSimTuningParameters* tuningpars = new WCSimTuningParameters();
@@ -540,6 +549,7 @@ G4double ABSORPTION_skAcrylic[306] =
 						     Plastic,
 						     "matrixLogic");
 
+  G4LogicalSkinSurface* matrixSurfaceProperties = new G4LogicalSkinSurface("matrixSkinSurface", matrixLogic, PlasticSkinSurface);
   
   G4VPhysicalVolume *physMatrix = new G4PVPlacement(0,
 						    G4ThreeVector(0.,0.,-298.*mm),
@@ -559,8 +569,11 @@ G4double ABSORPTION_skAcrylic[306] =
 				   0.*deg, 360.*deg);
 
   G4LogicalVolume *flangeLogic = new G4LogicalVolume(flangeSolid,
-                                                     Air,
+						     Plastic,
                                                      "flangeLogic");
+  
+  G4LogicalSkinSurface* flangeSurfaceProperties = new G4LogicalSkinSurface("flangeSkinSurface", flangeLogic, PlasticSkinSurface);
+
   
   G4VPhysicalVolume *physFlange = new G4PVPlacement(0,
                                                    G4ThreeVector(0.,0.,-112.*mm),
@@ -571,36 +584,6 @@ G4double ABSORPTION_skAcrylic[306] =
                                                    0,
                                                    true);
   
-  ///////////////////////Dome//////////////////////////////////////////
-
-  G4Sphere *domeSolid = new G4Sphere("DomeSolid",
-                                       332.*mm,
-                                       347.*mm,
-				       0.0*deg, 360.0*deg,
-				       0.0, 45.*deg);
-
-
-  G4LogicalVolume *domeLogic = new G4LogicalVolume(domeSolid,
-						   Acrylic,
-						   "DomeLogic");
-
-  
-  G4VPhysicalVolume *physDome = new G4PVPlacement(0,
-						  G4ThreeVector(0.,0.,-273.6*mm),
-						  domeLogic,
-						  "physDome",
-						  logicmPMT,
-						  false,
-						  0,
-						  true);
-  
-  
-  G4VisAttributes *domeAttributes = new G4VisAttributes();
-  domeAttributes->SetColor(1.0, 1.0, 1.0, 0.5);
-  domeAttributes->SetVisibility(true);
-  domeAttributes->SetForceSolid(true);
-  domeLogic->SetVisAttributes(domeAttributes);
-  
   //////////////////////////cylinder//////////////////////////////////////
 
   G4Tubs *cylinderSolid = new G4Tubs("cylinderSolid",
@@ -610,11 +593,14 @@ G4double ABSORPTION_skAcrylic[306] =
 				     0.*deg, 360.*deg);
 
   G4LogicalVolume *cylinderLogic = new G4LogicalVolume(cylinderSolid,
-						       Air,
+						       Plastic,
 						       "flangeLogic");
   
+  G4LogicalSkinSurface* cylinderSurfaceProperties = new G4LogicalSkinSurface("cylinderSkinSurface", cylinderLogic, PlasticSkinSurface);
+
+  
   G4VPhysicalVolume *physCylinder = new G4PVPlacement(0,
-						    G4ThreeVector(0.,0.,-116.4*mm),
+						    G4ThreeVector(0.,0.,-120.385*mm),
 						    cylinderLogic,
 						    "physCylinder",
 						    logicmPMT,
@@ -640,6 +626,8 @@ G4double ABSORPTION_skAcrylic[306] =
   G4double yArray[] = {0.*mm, 0.*mm, -73.125*mm, -73.125*mm, 0.*mm, 73.125*mm, 73.125*mm, 0.*mm, -77.55*mm, -134.32*mm, -155.109*mm, -134.32*mm, -77.55*mm, 0.*mm, 77.55*mm, 134.32*mm, 155.109*mm, 134.32*mm, 77.55*mm};
 
   G4double zArray[] = {0.*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -13.89*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm, -50.24*mm};
+
+  G4double zdomeArray[] = {277.6*mm, 263.71*mm, 263.71*mm, 263.71*mm, 263.71*mm, 263.71*mm, 263.71*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm, 227.36*mm};
 
   G4double xthetaArray[] = {0.*deg, 0.*deg, 16.24*deg, 16.24*deg, 0.*deg, -16.24*deg, -16.24*deg, 0.*deg, 19.861*deg, 32.03*deg, 35.846*deg, 32.03*deg, 19.861*deg, 0.*deg, -19.861*deg, -32.03*deg, -35.846*deg, -32.03*deg, -19.861*deg};
 
@@ -681,6 +669,71 @@ G4double ABSORPTION_skAcrylic[306] =
   						   true);
   }
   
+  ///////////////////////Dome///////////////////////////                                                                     
+  G4double domeInnerRadius = 332.*mm;
+  G4double domeOuterRadius = 347.*mm;
+
+  G4Sphere *domeSphere = new G4Sphere("DomeSphere",
+				      domeInnerRadius,
+				      domeOuterRadius,
+				      0.0*deg, 360.0*deg,
+				      0.0, 90.*deg);
+
+  G4Box *solidBoxCutOut = new G4Box("BoxCutOut",
+				    domeOuterRadius+1.*cm,
+				    domeOuterRadius+1.*cm,
+				    235*mm);
+
+  G4VSolid *domeSolid = new G4SubtractionSolid("domeSolid",
+                                               domeSphere,
+                                               solidBoxCutOut);
+
+  G4VSolid* newDomeSubtraction = domeSolid;
+
+  G4Transform3D* transform = new G4Transform3D[numPMTs];
+
+  for(G4int i = 0; i < numPMTs; ++i)
+    {
+      transform[i] = G4Translate3D(xArray[i], yArray[i], zdomeArray[i]) * G4RotateX3D(xthetaArray[i]) * G4RotateY3D(ythetaArray[i]) * G4RotateZ3D(phiArray[i]);
+
+    }
+
+  for(G4int i = 0; i < numPMTs; ++i)
+    {
+      std::stringstream ss;
+      ss << i;
+      std::string index_str = ss.str();
+
+      newDomeSubtraction = new G4SubtractionSolid("subtraction_" + index_str,
+						  newDomeSubtraction,
+						  //PMTSolid,                 
+						  logicPMT->GetSolid(),
+						  transform[i]);
+
+    }
+
+
+  G4LogicalVolume *domeLogic = new G4LogicalVolume(newDomeSubtraction,
+						   //domeSolid,
+                                                   Acrylic,
+                                                   "DomeLogic");
+
+
+  G4VPhysicalVolume *physDome = new G4PVPlacement(0,
+                                                  G4ThreeVector(0.,0.,-277.6*mm),
+                                                  domeLogic,
+                                                  "physDome",
+                                                  logicmPMT,
+                                                  false,
+                                                  0,
+                                                  true);
+
+  G4VisAttributes *domeAttributes = new G4VisAttributes();
+  domeAttributes->SetColor(1.0, 1.0, 1.0, 0.5);
+  domeAttributes->SetVisibility(true);
+  domeAttributes->SetForceSolid(true);
+  domeLogic->SetVisAttributes(domeAttributes);
+
   
   /*
   G4VPhysicalVolume *physPMT = new G4PVPlacement(0,

@@ -26,7 +26,7 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   G4Material *check = nist->FindOrBuildMaterial("G4_GALACTIC");
 
   /////////////////////vacuum///////////////
-
+  
   density     = universe_mean_density;              //from PhysicalConstants.h                                        
   G4double pressure    = 1.e-19*pascal;
   G4double temperature = 0.1*kelvin;
@@ -38,11 +38,11 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   a = 14.01*g/mole;
   G4Element* elN
     = new G4Element("Nitrogen","N", 7,a);
-
+  
   a = 16.00*g/mole;
   G4Element* elO
   = new G4Element("Oxygen","O", 8,a);
-
+  
   density = 1.290*mg/cm3;
   G4Material* Air1
     = new G4Material("Air",density,2);
@@ -50,20 +50,16 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   Air1->AddElement(elO, 30.*perCent);
 
   //////////////Water///////////////////
-
+  
   a = 1.01*g/mole;
-  G4Element* H
+  G4Element* elH
     = new G4Element("Hydrogen","H", 1,a);
-
-  a = 16.00*g/mole;
-  G4Element* O
-    = new G4Element("Oxygen","O", 8,a);
-
+  
   density = 1.00*g/cm3;
   G4Material* Water
     = new G4Material("Water",density,2);
-  Water->AddElement(H, 2);
-  Water->AddElement(O, 1);
+  Water->AddElement(elH, 2);
+  Water->AddElement(elO, 1);
 
   /////////////////////Aluminum///////////////////                                                                          
   a = 26.98*g/mole;
@@ -82,7 +78,7 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   G4Material *SilGel
     = new G4Material("SilGel",density,1);
   SilGel->AddElement(elSi, 1);
-
+  
   ////////////////////PLA///////////////////////
   G4Element *elC = new G4Element("Carbon", "C", 6, 12.01*g/mole);
 
@@ -90,19 +86,31 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   G4Material* Plastic
     = new G4Material("Plastic",density,2);
   Plastic->AddElement(elC, 1);
-  Plastic->AddElement(H, 2);
+  Plastic->AddElement(elH, 2);
 
+  ///////////////////PORON/////////////////////////
+  
+  density = 0.2403*g/cm3;
+  
+  G4Material* poron
+    = new G4Material("PolyurethaneFoam",density,4);
+
+  poron->AddElement(elC, 27);
+  poron->AddElement(elH, 36);
+  poron->AddElement(elN, 2);
+  poron->AddElement(elO, 10);
+  
 
   /////////////Absorber////////////////
-
+  
   G4double absorberThickness = 1.0*mm;
   G4double absorberheight = absorberThickness/2.;
   density = 0.96*g/cm3;
+  
 
 
-  G4Element *elH = new G4Element("Hydrogen", "H", 1, 1.01*g/mole);
   G4Material *absorberMaterial = new G4Material("customAbsorber", density, 2);
-
+  
   absorberMaterial->AddElement(elC, 1);
   absorberMaterial->AddElement(elH, 4);
 
@@ -110,7 +118,7 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
 
 
   const G4int NUMENTRIES_ref = 501;
-
+  
   G4double ENERGY_ref[NUMENTRIES_ref] = { 1.7712e-09, 1.77374e-09, 1.77628e-09, 1.77883e-09, 1.78138e-09, 1.78395e-09,
                                           1.78652e-09, 1.78909e-09, 1.79168e-09, 1.79427e-09, 1.79687e-09, 1.79948e-09,
                                           1.8021e-09, 1.80472e-09, 1.80735e-09, 1.80999e-09, 1.81263e-09, 1.81529e-09,
@@ -288,11 +296,9 @@ G4LogicalVolume *myDetectorConstruction::ConstructPMT()
   ReflectorSkinSurface->SetMaterialPropertiesTable(ref);
   Aluminum->SetMaterialPropertiesTable(ref);
 
-
-
   const G4int numEntries = 2;
   const G4int NUMENTRIES_water = 60;
-
+  
   G4double photonEnergy[numEntries] = {1.*eV, 10.*eV};
   G4double absorption[numEntries] = {absorptionCoeff, absorptionCoeff};
   G4double rindexWorld[numEntries] = {1.0, 1.0};
@@ -538,10 +544,10 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
       0.045*BSRFF, 0.045*BSRFF, 0.045*BSRFF, 0.045*BSRFF,
       0.045*BSRFF, 0.045*BSRFF };
 
-
+  
   G4double EFFICIENCY[NUMENTRIES_water] =
     { 0.001*m };
-
+  
 
   //  G4MaterialPropertiesTable *myMPT = new G4MaterialPropertiesTable();
   //  myMPT->AddProperty("RINDEX", ENERGY_water, RINDEX_air, NUMENTRIES_water);
@@ -575,20 +581,75 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 
   absorberMaterial->SetMaterialPropertiesTable(absorberProperties);
   Air->SetMaterialPropertiesTable(mptWorld);
+  
+  G4OpticalSurface*  AbsorberSkinSurface = new G4OpticalSurface("AbsorberSurface");
+  AbsorberSkinSurface->SetType(dielectric_metal);
+  AbsorberSkinSurface->SetModel(unified);
+  AbsorberSkinSurface->SetFinish(polished);
 
+G4double ABSORBER_ref[NUMENTRIES_water] =
+  { .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0,
+    .0, .0, .0, .0, .0, .0};
+  
 
+ G4MaterialPropertiesTable *absMaterial = new G4MaterialPropertiesTable();
+ absMaterial->AddProperty("REFLECTIVITY", ENERGY_water, ABSORBER_ref, NUMENTRIES_water);
+ AbsorberSkinSurface->SetMaterialPropertiesTable(absMaterial);
+
+  /////////////////////////////////////////////////////////////////////
   G4MaterialPropertiesTable *myMPT1 = new G4MaterialPropertiesTable();
   myMPT1->AddProperty("RINDEX", ENERGY_water, RINDEX1, NUMENTRIES_water);
   myMPT1->AddProperty("ABSLENGTH",ENERGY_water, ABSORPTION_water, NUMENTRIES_water);
   myMPT1->AddProperty("RAYLEIGH",ENERGY_water,RAYLEIGH_water,NUMENTRIES_water);
 
   Water->SetMaterialPropertiesTable(myMPT1);
-
+  ///////////////////////////////////////////////////////////////
   G4MaterialPropertiesTable *myMPT3 = new G4MaterialPropertiesTable();
   myMPT3->AddProperty("ABSLENGTH", ENERGY_water, BLACKABS_blacksheet, NUMENTRIES_water);
   myMPT3->AddProperty("REFLECTIVITY", ENERGY_water, REFLECTIVITY_blacksheet, NUMENTRIES_water);
   myMPT3->AddProperty("EFFICIENCY",   ENERGY_water, EFFICIENCY, NUMENTRIES_water);
   Plastic->SetMaterialPropertiesTable(myMPT3);
+
+  G4OpticalSurface*  PlasticSkinSurface = new G4OpticalSurface("PlasticSurface");
+  PlasticSkinSurface->SetType(dielectric_metal);
+  PlasticSkinSurface->SetModel(unified);
+  PlasticSkinSurface->SetFinish(polished);
+
+  G4MaterialPropertiesTable *plasticMaterial = new G4MaterialPropertiesTable();
+  plasticMaterial->AddProperty("REFLECTIVITY", ENERGY_water, REFLECTIVITY_blacksheet, NUMENTRIES_water);
+  PlasticSkinSurface->SetMaterialPropertiesTable(plasticMaterial);
+
+
+  //////////////////////////////////////////
+  G4double PORON_ref[NUMENTRIES_water] = 
+    { .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01,
+      .01, .01, .01, .01, .01, .01};
+
+  G4OpticalSurface*  PoronSkinSurface = new G4OpticalSurface("PoronSurface");
+  PoronSkinSurface->SetType(dielectric_metal);
+  PoronSkinSurface->SetModel(unified);
+  PoronSkinSurface->SetFinish(polished);
+
+  G4MaterialPropertiesTable *poron_foam = new G4MaterialPropertiesTable();
+  poron_foam->AddProperty("REFLECTIVITY", ENERGY_water, PORON_ref, NUMENTRIES_water);
+  PoronSkinSurface->SetMaterialPropertiesTable(poron_foam);
+  poron->SetMaterialPropertiesTable(poron_foam);
 
   /////////PMT Glass Material///////////////  
   density = 2.20*g/cm3;
@@ -638,39 +699,23 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   G4double pmtConeHeight = 20.0*mm;
 
   ///////////////////////////////Defining World Volume/////////////////////////////////
-  G4double zPlanesCylinder[2] = {28.705, 54.4};
-  G4double rInnerCylinder[2] = {0, 0};
-  G4double rOuterCylinder[2] = {44.5, 47.5};
-  G4Polycone* solidWorldCylinder = new G4Polycone("solidWorld",
+  G4double zPlanesCylinder[3] = {-20.2, 28.705, 54.4};
+  G4double rInnerCylinder[3] = {0, 0, 0};
+  G4double rOuterCylinder[3] = {35.22, 44.5, 47.5};
+  G4Polycone* solidWorld = new G4Polycone("solidWorld",
 						  0,
 						  2 * M_PI,
-						  2,
+						  3,
 						  zPlanesCylinder,
 						  rInnerCylinder,
 						  rOuterCylinder);
-					
-  G4double zPlanesCone[2] = {-20.2, 28.705};
-  G4double rInnerCone[2] = {0, 0};
-  G4double rOuterCone[2] = {35.22, 44.5};
-  G4Polycone* solidWorldCone = new G4Polycone("solidWorld",
-					      0,
-					      2 * M_PI,
-					      2,
-					      zPlanesCone,
-					      rInnerCone,
-					      rOuterCone);
-
-  G4UnionSolid* combinedWorld = new G4UnionSolid("combineWorld", solidWorldCylinder, solidWorldCone);
-  
   ////////////////////////////////////////////////////////////////////////////////////
   
   //  G4Box *solidWorld = new G4Box("solidWorld", 50*mm, 50*mm, 100*mm);
 
   
-  G4LogicalVolume *logicWorld = new G4LogicalVolume(//solidWorld,
-						    combinedWorld,
-						    //Air, 
-						    Water,
+  G4LogicalVolume *logicWorld = new G4LogicalVolume(solidWorld,
+						    Air1,
 						    "logicWorld");
    
   //  G4VisAttributes* invisible = new G4VisAttributes(false);
@@ -829,41 +874,6 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 							0,
 							true);
 
-  
-  
-  /*
-  ////////////////////Checking OverLap///////////////////////////////////
-  G4SubtractionSolid* intersection = new G4SubtractionSolid("intersection", pmtGlassSolid, tube);
-  G4bool touching = (intersection->GetCubicVolume() > 0.0);
-
-
-  if(touching)
-    {
-      G4cout<<"The solids are touching each other with no space"<<G4endl;
-    }
-  else
-    {
-      G4cout<<"There is a space between the solids"<<G4endl;
-    }
-  ////////////////////////////////////////////////////////////////////////
-  
-  G4double PMTOffset = 34.597*mm;
-
-  G4Box *solidCutOff = new G4Box("cutOffTubs",
-				 pmtGlassRadius+1.*cm,
-				 pmtGlassRadius+1.*cm,
-				 PMTOffset);
-
-  G4Sphere *tmPmtInnerGlassSolid = new G4Sphere("tmPmtInnerGlassSolid",
-						0.0*mm,pmtGlassRadius,
-						0.0*deg, 360.0*deg,
-						0.0, 90.*deg);
-
-  G4SubtractionSolid *pmtInnerGlassSolid = new G4SubtractionSolid("pmtInnerglass",
-								  tmPmtInnerGlassSolid,
-								  solidCutOff);
-  
-  */
   G4Sphere *pmtInnerGlassSolid = new G4Sphere("pmtInnerglassSolid",
 					      0.*mm,
 					      pmtGlassRadius-pmtGlassThickness,
@@ -916,6 +926,8 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 				      absorberMaterial, 
 				      "logicabsorber");
     
+  G4LogicalSkinSurface* AbsorberSurfaceProperties = new G4LogicalSkinSurface("AbsorberSurfaceProperties", logicabsorber, AbsorberSkinSurface);
+
   G4VPhysicalVolume *absorber = new G4PVPlacement(0, 
 						  absorberPosition, 
 						  logicabsorber, 
@@ -1270,11 +1282,13 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
                                                        Plastic,
                                                        "logicCone1");
 
+  G4LogicalSkinSurface* PMTCupSurfaceProperties = new G4LogicalSkinSurface("PMTCupSkinSurface",logicCupCombine1, PlasticSkinSurface);
   
+
   G4VPhysicalVolume *PMTCup = new G4PVPlacement(0,                                                                         
 						G4ThreeVector(0.,0.,0.*mm),                                               
 						logicCupCombine1,                                                         
-						"glassTube",                                                              
+						"PMTCup",                                                              
 						logicWorld,                                                         
 						false,                                                                     
 						0,                                                                       
@@ -1325,10 +1339,13 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
 				  0.*deg, 360.*deg);
 
   G4LogicalVolume *poronLogic = new G4LogicalVolume(poronSolid,
-						    Air,
+						    poron,
 						    "poronLogic");
   
-  G4VPhysicalVolume *poron = new G4PVPlacement(0,                                                                         
+    G4LogicalSkinSurface* PoronSurfaceProperties = new G4LogicalSkinSurface("PoronSurfaceProperties",poronLogic,PoronSkinSurface);
+
+
+  G4VPhysicalVolume *Poron = new G4PVPlacement(0,                                                                         
 					       //G4ThreeVector(0.,0.,-16.615*mm),  
 					       G4ThreeVector(0.,0.,-15.35*mm),  
 					       poronLogic,                                                                  
