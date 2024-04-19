@@ -560,7 +560,6 @@ G4double ABSORPTION_water[NUMENTRIES_water] =
   G4MaterialPropertiesTable *SilGelPropTable = new G4MaterialPropertiesTable();
   SilGelPropTable->AddProperty("RINDEX", ENERGY_water, RINDEX_SilGel, NUMENTRIES_water);
   SilGelPropTable->AddProperty("ABSLENGTH",ENERGY_SilGel, ABSORPTION_SilGel, 18);
-  //   SilGelPropTable->AddProperty("RAYLEIGH",ENERGY_water,RAYLEIGH_water,NUMENTRIES_water); 
   SilGel->SetMaterialPropertiesTable(SilGelPropTable);
 
 
@@ -703,32 +702,55 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
   G4double rInnerCylinder[3] = {0, 0, 0};
   G4double rOuterCylinder[3] = {35.22, 44.5, 47.5};
   G4Polycone* solidWorld = new G4Polycone("solidWorld",
-						  0,
-						  2 * M_PI,
-						  3,
-						  zPlanesCylinder,
-						  rInnerCylinder,
-						  rOuterCylinder);
-  ////////////////////////////////////////////////////////////////////////////////////
+					  0,
+					  2 * M_PI,
+					  3,
+					  zPlanesCylinder,
+					  rInnerCylinder,
+					  rOuterCylinder);
   
-  //  G4Box *solidWorld = new G4Box("solidWorld", 50*mm, 50*mm, 100*mm);
+                                                                                                                           
+  G4double domeInnerRadius = 332.*mm;
+  G4double domeOuterRadius = 347.*mm;
 
+  G4Sphere *domeSphere = new G4Sphere("DomeSphere",
+                                      domeInnerRadius,
+                                      domeOuterRadius,
+                                      0.0*deg, 360.0*deg,
+                                      0.0, 90.*deg);
+
+  G4Box *solidBoxCutOut = new G4Box("BoxCutOut",
+                                    domeOuterRadius+1.*cm,
+                                    domeOuterRadius+1.*cm,
+                                    235*mm);
+
+  G4VSolid *domeSolid = new G4SubtractionSolid("domeSolid",
+                                               domeSphere,
+                                               solidBoxCutOut);
   
-  G4LogicalVolume *logicWorld = new G4LogicalVolume(solidWorld,
-						    Air1,
+
+  G4VSolid* subtractionWorld = new G4SubtractionSolid("domeSolidWorld",
+						      solidWorld,
+						      domeSolid,
+						      0,
+						      G4ThreeVector(0,0,-277.6*mm));
+
+  G4LogicalVolume *logicWorld = new G4LogicalVolume(subtractionWorld,
+						    //Air1,
+						    SilGel,
 						    "logicWorld");
-   
-  //  G4VisAttributes* invisible = new G4VisAttributes(false);
-  //  logicWorld->SetVisAttributes(invisible);
-  //  logicWorld->SetSensitiveDetector(NULL);
   
-  G4VPhysicalVolume *physWorld = new G4PVPlacement(0, 
-						   G4ThreeVector(0.,0.,0.), 
-						   logicWorld, 
-						   "physWorld", 
-						   0, 
-						   false, 
-						   0, 
+  G4VisAttributes* invisible = new G4VisAttributes(false);
+  logicWorld->SetVisAttributes(invisible);         
+  logicWorld->SetSensitiveDetector(NULL);    
+
+  G4VPhysicalVolume *physWorld = new G4PVPlacement(0,
+						   G4ThreeVector(0,0,0),
+						   logicWorld,
+						   "physWorld",
+						   0,
+						   false,
+						   0,
 						   true);
 
   G4Cons *SolidCone = new G4Cons("pmtCone", 
@@ -744,22 +766,6 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 			    pmtCylRadius, 
 			    pmtCylHeight/2.*mm, 
 			    0.*deg, 360.*deg);
-  /////////////////////Check contact////////////////////
-  /*
-  G4SubtractionSolid* intersection = new G4SubtractionSolid("intersection", tube, SolidCone);
-  G4bool touching = (intersection->GetCubicVolume() > 0.0);
-
-
-  if(touching)
-    {
-      G4cout<<"The solids are touching each other with no space"<<G4endl;
-    }
-  else
-    {
-      G4cout<<"There is a space between the solids"<<G4endl;
-    }
-*/
-  //////////////////////////////////////////////
   
   G4UnionSolid *combineSolid1 = new G4UnionSolid("tubeplusreflection", 
 						 SolidCone, 
@@ -772,11 +778,6 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 						       "logicCombine1");
 
   
-  /*
-  G4LogicalVolume *logicWorld = new G4LogicalVolume(combineSolid1,
-                                                      PMTGlass,
-                                                      "logicWorld");
-  */
   G4VPhysicalVolume *glassTube = new G4PVPlacement(0,
                                                    G4ThreeVector(0.,0.,0.),
                                                    logicCombine1,
@@ -785,7 +786,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
                                                    false,
                                                    0,
                                                    true);
-
+  
 
   G4Box *solidCutOff = new G4Box("cutOffTubs",                                                                            
                                  pmtGlassRadius+1.*cm,                                                                     
@@ -802,21 +803,13 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 						       pmtGlassSolid,                                   
 						       solidCutOff); 
 
-  //  G4Transform3D transform(G4Translate3D(0.0, 0.0, -18.097*mm));
   G4Transform3D transform(G4Translate3D(0.0, 0.0, -17.702*mm));
-  /*
-  G4UnionSolid *combineSolid2 = new G4UnionSolid("glassplustubeplusreflection", 
-						 combineSolid1, 
-						 pmtGlass, 
-						 transform);
-  
-  */
+
   pmtGlassLogic = new G4LogicalVolume(pmtBulb, 
 				      PMTGlass, 
 				      "pmtGlassLogic");
   
   G4VPhysicalVolume *pmtSphere = new G4PVPlacement(0, 
-						   //G4ThreeVector(0.,0.,-18.097*mm), 
 						   G4ThreeVector(0.,0.,-6.597*mm), 
 						   pmtGlassLogic, 
 						   "pmtSphere", 
@@ -824,6 +817,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 						   false, 
 						   0, 
 						   true);
+  
   fScoringPMTVolume = pmtGlassLogic;
 
   ///////////////////PMT INNER/////////////////////////////////
@@ -835,17 +829,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
                                  pmtCylRadius-pmtGlassThickness-0.1*mm,
 				 pmtConeHeight/2.*mm,
                                  0.*deg, 360.*deg);
-  /*
-  G4LogicalVolume *innerLogicCone = new G4LogicalVolume(innerSolidCone, Air1, "innerLogicCone");
-  G4VPhysicalVolume *placeInnerCone = new G4PVPlacement(0,
-						    G4ThreeVector(0.,0.,0.0*mm),
-						    innerLogicCone,
-						    "placeInnerCone",
-						    logicWorld,
-						    false,
-						    0,
-						    true);
-   */
+
   G4Tubs *innerTube = new G4Tubs("innerTube",
 				 0.,
 				 pmtCylRadius-pmtGlassThickness-0.1*mm,
@@ -873,7 +857,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 							false,
 							0,
 							true);
-
+  
   G4Sphere *pmtInnerGlassSolid = new G4Sphere("pmtInnerglassSolid",
 					      0.*mm,
 					      pmtGlassRadius-pmtGlassThickness,
@@ -927,7 +911,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 				      "logicabsorber");
     
   G4LogicalSkinSurface* AbsorberSurfaceProperties = new G4LogicalSkinSurface("AbsorberSurfaceProperties", logicabsorber, AbsorberSkinSurface);
-
+  
   G4VPhysicalVolume *absorber = new G4PVPlacement(0, 
 						  absorberPosition, 
 						  logicabsorber, 
@@ -1192,7 +1176,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 
   OpGelFoamSurface->SetMaterialPropertiesTable(myST1);
   */
-
+  
   G4Sphere *gelSolid = new G4Sphere("GelSolid",
                                     311.95*mm,
                                     332.*mm,
@@ -1219,8 +1203,6 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
   G4LogicalVolume *gelLogic = new G4LogicalVolume(pmtInnerGelSolid,
 						  SilGel,
                                                   "gelLogic");
-
-  /////////////////////////////////////////
 
   G4VisAttributes *gelAttributes = new G4VisAttributes();
   gelAttributes->SetColor(1.0, 1.0, 1.0, 0.5);
@@ -1284,7 +1266,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 
   G4LogicalSkinSurface* PMTCupSurfaceProperties = new G4LogicalSkinSurface("PMTCupSkinSurface",logicCupCombine1, PlasticSkinSurface);
   
-
+  
   G4VPhysicalVolume *PMTCup = new G4PVPlacement(0,                                                                         
 						G4ThreeVector(0.,0.,0.*mm),                                               
 						logicCupCombine1,                                                         
@@ -1344,7 +1326,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
   
     G4LogicalSkinSurface* PoronSurfaceProperties = new G4LogicalSkinSurface("PoronSurfaceProperties",poronLogic,PoronSkinSurface);
 
-
+    
   G4VPhysicalVolume *Poron = new G4PVPlacement(0,                                                                         
 					       //G4ThreeVector(0.,0.,-16.615*mm),  
 					       G4ThreeVector(0.,0.,-15.35*mm),  
@@ -1354,7 +1336,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 					       false,                                                                       
 					       0,                                                                           
 					       true);                                                                       
-                                                                                                                 
+                                                                                                               
   G4VisAttributes *poronAttributes = new G4VisAttributes();                                                               
   poronAttributes->SetColor(1.0, 1.0, 0.0);                                                                               
   poronAttributes->SetVisibility(true);                                                                                   
