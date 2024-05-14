@@ -18,31 +18,44 @@
 #include "generator.hh"
 #include "MyPrimaryGeneratorMessenger.hh"
 #include "constructMultiPMT.hh"
+#include "constructInSitumPMT.hh"
+#include "constructionPMT.hh"
+#include "inSituPMT.hh"
 
 int main(int argc, char** argv)
 {
   G4RunManager *runManager = new G4RunManager();
-  //G4SteppingVerbose::SetInstance(new G4SteppingVerbose);
-  //  runManager->SetVerboseLevel(1);
+  
   WCSimTuningParameters* tuningpars = new WCSimTuningParameters();
-  //  G4VSteppingVerbose* steppingVerbose = new G4SteppingVerbose;
-  //  G4VSteppingVerbose::SetInstance(steppingVerbose);
-
   enum DetConfiguration {wfm =1, fwm=2};
   G4int WCSimConfiguration = fwm;
-
+  /*  
+  /////////// EX-SITU MODEL
   myDetectorConstruction* detectorConstruction = new myDetectorConstruction(WCSimConfiguration, tuningpars);
   G4LogicalVolume* logicPMT = detectorConstruction->ConstructPMT();
-  
   ConstructMultiPMT* multiPMT = new ConstructMultiPMT(detectorConstruction, logicPMT);
+  runManager->SetUserInitialization(multiPMT);     
+  /////////////////////////
+  */
+  ////////////IN-SITU MODEL
+  //  inSituPMTConstruction *inSituPMT = new inSituPMTConstruction(WCSimConfiguration, tuningpars);
+  //  G4VSolid* logicInSituPMT = inSituPMT->ConstructioninSituPMT();
+
+  //Subtraction PMT
+  pmtConstruction* subtractionPMT = new pmtConstruction();
+  G4VSolid* PMTSolid = subtractionPMT->ConstructionPMT();
+
+  ConstructInSitumPMT* InSitumPMT = new ConstructInSitumPMT(subtractionPMT, PMTSolid);
+  runManager->SetUserInitialization(InSitumPMT); 
+
+/////////////////////////
 
   
-  //  runManager->SetUserInitialization(myDetector);
-  runManager->SetUserInitialization(multiPMT); 
+  //  runManager->SetUserInitialization(detectorConstruction); 
   runManager->SetUserInitialization(new MyPhysicsList());
   runManager->SetUserInitialization(new MyActionInitialization());
-
   runManager->Initialize();
+  
 
   G4UIExecutive *ui = 0;
 
@@ -61,16 +74,13 @@ int main(int argc, char** argv)
   UImanager->ApplyCommand("/tracking/verbose 1");  
 
   MyPrimaryGenerator* generator = new MyPrimaryGenerator();
-  //runManager->SetUserAction(generator);
-
   MyPrimaryGeneratorMessenger* generatorMessenger = new MyPrimaryGeneratorMessenger(generator);
-  //runManager->SetUserAction(generatorMessenger);
+
 
   if(ui)
     {
       UImanager->ApplyCommand("/control/execute vis.mac");
       ui->SessionStart();
-      //    delete ui;
     }
   else
     {
@@ -80,10 +90,6 @@ int main(int argc, char** argv)
       G4cout<<"FileName = "<<filename<<G4endl;
 
     }
-  //  file_exists("tuning_parameters.mac");
-
-
-  //  ui->SessionStart();
 
   delete ui;
   delete runManager;
