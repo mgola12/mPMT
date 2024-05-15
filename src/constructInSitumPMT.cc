@@ -377,10 +377,10 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   ///////////////////////In-Situ Matrix///////////////////////////
   G4Sphere *inSituMatrixSolid = new G4Sphere("inSituMatrixSolid",
-					     264.208*mm,
+					     263.003*mm,
 					     325.603*mm,
 					     0.0*deg, 360.0*deg,
-					     0.0, 43.226*deg);
+					     0.0, 43.4549*deg);
 
   /*  
   G4LogicalVolume *inSituMatrixLogic = new G4LogicalVolume(inSituMatrixSolid,
@@ -448,6 +448,9 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   G4double zGelArray[] = {248.4*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 197.52*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm};
 
+  G4double thetaArray[] = { 0.*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 
+                            35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 
+                            35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg };
 
   G4double xthetaArray[] = {0.*deg, 0.*deg, 15.8353*deg, 15.8353*deg, 0.*deg, -15.8353*deg, -15.8353*deg, 0.*deg, 19.5049*deg, 31.5299*deg, 35.3149*deg, 31.5299*deg, 19.5049*deg, 0.*deg, -19.5049*deg, -31.5299*deg, -35.3149*deg, -31.5299*deg, -19.5049*deg};
 
@@ -464,18 +467,18 @@ G4double Matrix_ref[NUMENTRIES_water] =
       transform[i] = G4Translate3D(xArray[i], yArray[i], zArray[i]) * G4RotateX3D(xthetaArray[i]) * G4RotateY3D(ythetaArray[i]) * G4RotateZ3D(phiArray[i]);
     }
 
-  for(G4int i = 0; i < numPMTs; ++i)
-    {
-      std::stringstream ss;
-      ss << i;
-      std::string index_str = ss.str();
+  // for(G4int i = 0; i < numPMTs; ++i)
+  //   {
+  //     std::stringstream ss;
+  //     ss << i;
+  //     std::string index_str = ss.str();
 
-      newSubtraction = new G4SubtractionSolid("subtraction_" + index_str,
-					      newSubtraction,
-					      PMTSolid,
-					      //inSituPMTLogic->GetSolid(),
-					      transform[i]);
-    }
+  //     newSubtraction = new G4SubtractionSolid("subtraction_" + index_str,
+	// 				      newSubtraction,
+	// 				      PMTSolid,
+	// 				      //inSituPMTLogic->GetSolid(),
+	// 				      transform[i]);
+  //   }
 
   G4LogicalVolume *subtractionLogic = new G4LogicalVolume(newSubtraction,
 							  Plastic,
@@ -487,18 +490,8 @@ G4double Matrix_ref[NUMENTRIES_water] =
   visAttributes->SetForceSolid(false);
   visAttributes->SetForceWireframe(true);
   subtractionLogic->SetVisAttributes(visAttributes);
-  
-  G4VPhysicalVolume *Matrix =   new G4PVPlacement(0,
-						  G4ThreeVector(0.,0.,-274.003*mm),
-						  subtractionLogic,
-						  "Matrix",
-						  logicInSitumPMT,
-						  false,
-						  0,
-						  true);
-  
-  
-  /////////////////////Placing PMT on the matrix////////////////////
+
+/////////////////////Placing PMT on the matrix////////////////////
   G4VisAttributes *pmtAttributes = new G4VisAttributes();
   pmtAttributes->SetColor(1.0, 0.0, 0.0, 0.5);
   pmtAttributes->SetVisibility(true);
@@ -506,6 +499,12 @@ G4double Matrix_ref[NUMENTRIES_water] =
   inSituPMTLogic->SetVisAttributes(pmtAttributes);
 
   for (int i = 0; i < numPMTs; i++) {
+    G4ThreeVector PMTPosition = {0,0,0};
+
+    G4RotationMatrix* PMTRotation = new G4RotationMatrix;
+    PMTRotation->rotateZ(-phiArray[i]);
+    PMTRotation->rotateY(-thetaArray[i]);
+
     G4double x = xArray[i];
     G4double y = yArray[i];
     G4double z = zPMTArray[i];
@@ -525,16 +524,25 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
     G4ThreeVector translation(x,y,z);
     
-    G4VPhysicalVolume *pmtCopy = new G4PVPlacement(rot,
-						   translation,
+    G4VPhysicalVolume *pmtCopy = new G4PVPlacement(PMTRotation, //rot,
+						                                       PMTPosition, //translation,
                                                    inSituPMTLogic,
                                                    pmtName.c_str(),
-                                                   logicInSitumPMT,
+                                                   subtractionLogic,
                                                    false,
                                                    i,
                                                    true);
     
   }
+
+  G4VPhysicalVolume *Matrix =   new G4PVPlacement(0,
+						  G4ThreeVector(0.,0.,-274.003*mm),
+						  subtractionLogic,
+						  "Matrix",
+						  logicInSitumPMT,
+						  false,
+						  0,
+						  true);
   
 
 
@@ -559,7 +567,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   G4VSolid *gelSubtraction = new G4SubtractionSolid("gelSubtractionFromMatrix",
 						    gelSphere,
-						    newSubtraction,
+						    inSituMatrixSolid,
 						    0,
 						    G4ThreeVector(0.,0.,-25.603*mm));
   
@@ -578,10 +586,10 @@ G4double Matrix_ref[NUMENTRIES_water] =
       ss << i;
       std::string index_str = ss.str();
 
-      newGelSubtraction = new G4SubtractionSolid("subtraction_" + index_str,
-						 newGelSubtraction,
-						 inSituPMTLogic->GetSolid(),
-						 transformGel[i]);
+      // newGelSubtraction = new G4SubtractionSolid("subtraction_" + index_str,
+			// 			 newGelSubtraction,
+			// 			 inSituPMTLogic->GetSolid(),
+			// 			 transformGel[i]);
     }
   
 

@@ -470,18 +470,29 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
   G4double pmtCylHeight = 18.0*mm;
   G4double pmtConeHeight = 20.0*mm;
 
+  G4double matrxiRadius = 325.603*mm;
+  G4double pmtTotalHeight = absorberThickness + pmtConeHeight + pmtCylHeight + 23.6*mm;
+  G4double openingAngle = 8.14*deg;
+  G4double zoffset = 274.003*mm;
+
+  G4Sphere *solidWorld = new G4Sphere("solidWorld",
+                                         matrxiRadius-pmtTotalHeight,
+                                         matrxiRadius,
+                                         0.0*deg, 360.0*deg,
+                                         0.0, openingAngle);
+
   
   //  G4Box *solidWorld = new G4Box("solidInSitumPMT", 0.25*m, 0.25*m, .25*m);
-  G4double zPlanesCylinder[4] = {-11., 10., 28., 46.5};
-  G4double rInnerCylinder[4] = {0, 0, 0, 0};
-  G4double rOuterCylinder[4] = {26.1, 40.15, 40.15, 46.};
-  G4Polycone* solidWorld = new G4Polycone("solidWorld",
-                                          0,
-                                          2 * M_PI,
-                                          4,
-                                          zPlanesCylinder,
-                                          rInnerCylinder,
-                                          rOuterCylinder);
+  // G4double zPlanesCylinder[4] = {-pmtConeHeight/2.-absorberThickness, pmtConeHeight/2., pmtConeHeight/2.+pmtCylHeight, 46.5};
+  // G4double rInnerCylinder[4] = {0, 0, 0, 0};
+  // G4double rOuterCylinder[4] = {pmtTubeRadius, pmtCylRadius, pmtCylRadius, 46.};
+  // G4Polycone* solidWorld = new G4Polycone("solidWorld",
+  //                                         0,
+  //                                         2 * M_PI,
+  //                                         4,
+  //                                         zPlanesCylinder,
+  //                                         rInnerCylinder,
+  //                                         rOuterCylinder);
 
   G4LogicalVolume* logicWorld = new G4LogicalVolume(solidWorld,
 						    SilGel,
@@ -507,20 +518,20 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
                                  pmtTubeRadius,
                                  pmtCylRadius-pmtGlassThickness,
                                  pmtCylRadius,
-                                 pmtConeHeight/2.*mm,
+                                 pmtConeHeight/2.,
                                  0.*deg, 360.*deg);
 
   G4Tubs *tubeSolid = new G4Tubs("tubeSolid",
                                  pmtCylRadius-pmtGlassThickness,
                                  pmtCylRadius,
-                                 pmtCylHeight/2.*mm,
+                                 pmtCylHeight/2.,
                                  0.*deg, 360.*deg);
 
   G4VSolid *combineSolid1 = new G4UnionSolid("tubeCombined",
                                              coneSolid,
                                              tubeSolid,
                                              0,
-                                             G4ThreeVector(0.,0.,19.0*mm));
+                                             G4ThreeVector(0.,0.,(pmtConeHeight+pmtCylHeight)/2.));
 
 
   G4Box *solidCutOff = new G4Box("cutOffBox",
@@ -545,7 +556,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
 						      "pmtBulbLogic");
   
   G4VPhysicalVolume *pmtPhysBulb = new G4PVPlacement(0,
-                                                   G4ThreeVector(0.,0.,-6.597*mm),
+                                                   G4ThreeVector(0.,0.,-6.597*mm+zoffset),
                                                    pmtBulbLogic,
                                                    "pmtPhysBulb",
                                                    logicWorld,
@@ -554,10 +565,10 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
                                                    true);
   
   
-  combineSolid2 = new G4UnionSolid("OuterPMT",
-				   combineSolid1,
-				   pmtBulb,
-				   transform);
+  // combineSolid2 = new G4UnionSolid("OuterPMT",
+	// 			   combineSolid1,
+	// 			   pmtBulb,
+	// 			   transform);
   /*
   G4Tubs *pmtBase = new G4Tubs("pmtBase",
 				0.*mm,
@@ -577,7 +588,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
   
   
   G4VPhysicalVolume *totalPMT = new G4PVPlacement(0,
-						  G4ThreeVector(0.,0.,0.*mm),
+						  G4ThreeVector(0.,0.,0.*mm+zoffset),
 						  pmtBaseLogic,
 						  "totalPMT",
 						  logicWorld,
@@ -591,7 +602,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
                                      pmtTubeRadius,
                                      0.0,
                                      pmtTubeRadius,
-                                     0.5*mm,
+                                     absorberThickness/2.,
                                      0.0, 360.0*deg);
 
   
@@ -603,7 +614,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
 
 
   G4VPhysicalVolume *pmtAbsorber = new G4PVPlacement(0,
-						     G4ThreeVector(0.,0.,-10.5*mm),
+						     G4ThreeVector(0.,0.,-absorberThickness/2.-pmtConeHeight/2.+zoffset),
 						     absorberLogic,
 						     "pmtAbsorber",
 						     logicWorld,
@@ -631,7 +642,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
   G4LogicalSkinSurface* outerReflectorLogSkinSurface = new G4LogicalSkinSurface("outerReflectorLogSkinSurface", pmtReflectorLogic, outerReflectorSkinSurface);  
 
   G4VPhysicalVolume *pmtPhysReflector = new G4PVPlacement(0,
-							  G4ThreeVector(0.,0.,39.9*mm),
+							  G4ThreeVector(0.,0.,39.9*mm+zoffset),
 							  pmtReflectorLogic,
 							  "pmtPhysReflector",
 							  logicWorld,
@@ -652,7 +663,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
 
   G4Tubs *innerSolidTube = new G4Tubs("innerSolidTube",
 				      0.,
-				      pmtCylRadius-pmtGlassThickness-0.1*mm,
+				      pmtCylRadius-pmtGlassThickness,
 				      pmtCylHeight/2.,
 				      0.*deg, 360.*deg);
   
@@ -660,14 +671,14 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
                                              innerSolidCone,
                                              innerSolidTube,
                                              0,
-                                             G4ThreeVector(0.,0.,19.*mm));
+                                             G4ThreeVector(0.,0.,(pmtConeHeight+pmtCylHeight)/2.));
   
   G4LogicalVolume *pmtInnerTubeLogic = new G4LogicalVolume(combineSolid5,
 							   Air1,
 							   "pmtInnerTubeLogic");
   
   G4VPhysicalVolume *pmtPhysInnerTube = new G4PVPlacement(0,
-							  G4ThreeVector(0.,0.,0.0*mm),
+							  G4ThreeVector(0.,0.,0.0*mm+zoffset),
 							  pmtInnerTubeLogic,
 							  "pmtPhysInnerTube",
 							  logicWorld,
@@ -697,7 +708,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
 							   "pmtInnerBulbLogic");
   
   G4VPhysicalVolume *pmtInnerPhysBulb = new G4PVPlacement(0,
-							  G4ThreeVector(0.,0.,-6.597*mm),
+							  G4ThreeVector(0.,0.,-6.597*mm+zoffset),
 							  pmtInnerBulbLogic,
 							  "pmtInnerPhysBulb",
 							  logicWorld,
@@ -861,8 +872,8 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
 				     pmtTubeRadius-pmtGlassThickness-0.1*mm,
 				     pmtTubeRadius-pmtGlassThickness,
 				     pmtCylRadius-pmtGlassThickness-0.1*mm,
-				     pmtCylRadius-pmtGlassThickness-0.09*mm,
-				     10.*mm,
+				     pmtCylRadius-pmtGlassThickness,
+				     pmtConeHeight/2.,
 				     0.*deg, 360.*deg);
 
 
@@ -880,7 +891,7 @@ G4LogicalVolume *inSituPMTConstruction::ConstructioninSituPMT()
   logicLayer->SetVisAttributes(layerAttributes);
 
   G4VPhysicalVolume *innerReflector = new G4PVPlacement(0,
-							G4ThreeVector(0.,0.,0.),
+							G4ThreeVector(0.,0.,0.+zoffset),
 							logicLayer,
 							"innerReflector",
 							logicWorld,
