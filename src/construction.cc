@@ -725,7 +725,7 @@ G4double ABSORBER_ref[NUMENTRIES_water] =
 						      solidWorld,
 						      domeSolid,
 						      0,
-						      G4ThreeVector(0,0,-277.6*mm));
+						      G4ThreeVector(0,0,-277.6*mm-0.027*mm));
 
   G4LogicalVolume *logicWorld = new G4LogicalVolume(subtractionWorld,
 						    //Air1,

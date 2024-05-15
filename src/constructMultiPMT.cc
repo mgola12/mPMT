@@ -643,7 +643,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
   //////////////////////////cylinder//////////////////////////////////////
 
   G4Tubs *cylinderSolid = new G4Tubs("cylinderSolid",
-				     225.6*mm,
+				     227.1*mm,
 				     254.*mm,
 				     77.785*mm,
 				     0.*deg, 360.*deg);
@@ -691,8 +691,23 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   G4double phiArray[19] = {0.*deg, 0.*deg, -60.*deg, -120.*deg, 180.*deg, 120.*deg, 60*deg, 0.*deg, -30.*deg, -60.*deg, -90.*deg, -120.*deg, -150.*deg, 180.*deg, 150.*deg, 120.*deg, 90.*deg, 60.*deg, 30.*deg};
 
+  G4double thetaArray[19] =  {0.*deg, 18.59*deg, 18.59*deg, 18.59*deg, 18.59*deg, 18.59*deg, 18.59*deg,
+                              35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, 
+                              35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, 35.84*deg, };
+
+  double distanceToCenter = (332-54.373)*mm;
+  //double distanceToCenter = (332-54.4)*mm;
 
   for (int i = 0; i < numPMTs; i++) {
+
+    G4ThreeVector PMTPosition = {0,0,0};
+    PMTPosition.setRThetaPhi(distanceToCenter,thetaArray[i],phiArray[i]);  
+    PMTPosition.setZ(PMTPosition.getZ()-distanceToCenter+0.027*mm);
+
+    G4RotationMatrix* PMTRotation = new G4RotationMatrix;
+    PMTRotation->rotateZ(-phiArray[i]);
+    PMTRotation->rotateY(-thetaArray[i]);
+
     G4double x = xArray[i];
     G4double y = yArray[i];
     G4double z = zArray[i];
@@ -714,9 +729,9 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
     
     // Create and place the PMT copy                                                                                    
-    G4VPhysicalVolume *pmtCopy = new G4PVPlacement(rot,
+    G4VPhysicalVolume *pmtCopy = new G4PVPlacement(PMTRotation,//rot,
 						   //G4ThreeVector(x, y, z),
-						   translation,
+						   PMTPosition,//translation,
 						   logicPMT,
 						   pmtName.c_str(),
 						   logicmPMT,
