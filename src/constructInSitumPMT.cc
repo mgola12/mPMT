@@ -438,15 +438,17 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   G4double yArray[] = {0.*mm, 0.*mm, -71.39*mm, -71.39*mm, 0.*mm, 71.39*mm, 71.39*mm, 0.*mm, -76.55*mm, -132.59*mm, -153.109*mm, -132.59*mm, -76.55*mm, 0.*mm, 76.55*mm, 132.59*mm, 153.109*mm, 132.59*mm, 76.55*mm};
 
-  G4double zArray[] = {274.003*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 223.123*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm, 221.003*mm};
+  G4double zArray[] = {274.003*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 260.093*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm, 223.123*mm};
 
-  G4double zPMTArray[] = {0.0*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -50.88*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm, -53.*mm};
+  G4double zPMTArray[] = {0.0*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -13.91*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm, -50.88*mm};
 
   G4double zRefSubtractionArray[] = {293.5*mm, 279.13*mm, 279.13*mm, 279.13*mm, 279.13*mm, 279.13*mm, 279.13*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm, 240.5*mm};
 
   G4double zRefArray[] = {39.9*mm, 25.53*mm, 25.53*mm, 25.53*mm, 25.53*mm, 25.53*mm, 25.53*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm, -13.1*mm,};
 
-  G4double zGelArray[] = {248.4*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 197.52*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm, 195.4*mm};
+  //  G4double zGelArray[] = {248.4*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 234.49*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm, 197.52*mm};
+
+  G4double zGelArray[] = {271.9*mm, 257.99*mm, 257.99*mm, 257.99*mm, 257.99*mm, 257.99*mm, 257.99*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm, 221.02*mm};
 
   G4double thetaArray[] = { 0.*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 18.1345*deg, 
                             35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 35.3149*deg, 
@@ -550,7 +552,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
   ///////////////////////Making gel/////////////////////////////////////////
 
   G4Sphere *gelSolid = new G4Sphere("gelSolid",
-				    300.*mm,
+				    323.5*mm,
 				    332.*mm,
 				    0.0*deg, 360.0*deg,
 				    0.0, 90.0*deg); //44.952*deg);
@@ -558,7 +560,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
   G4Box *solidGelCutOut = new G4Box("BoxCutOut",
                                     332*mm+1.*cm,
                                     332*mm+1.*cm,
-                                    217.54*mm);
+                                    241.04*mm);
 
   G4VSolid *gelSphere = new G4SubtractionSolid("domeSolid",
                                                gelSolid,
@@ -569,7 +571,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
 						    gelSphere,
 						    inSituMatrixSolid,
 						    0,
-						    G4ThreeVector(0.,0.,-25.603*mm));
+						    G4ThreeVector(0.,0.,-2.103*mm));
   
   G4VSolid* newGelSubtraction = gelSubtraction;
 
@@ -604,9 +606,9 @@ G4double Matrix_ref[NUMENTRIES_water] =
   gelAttributes->SetForceSolid(true);
   gelLogic->SetVisAttributes(gelAttributes);
   
-  
+    
   G4VPhysicalVolume *gelPhys = new G4PVPlacement(0,
-						 G4ThreeVector(0.,0.,-248.4*mm),
+						 G4ThreeVector(0.,0.,-271.9*mm),
                                                  gelLogic,
                                                  "gelPhys",
                                                  logicInSitumPMT,
@@ -641,7 +643,7 @@ G4double Matrix_ref[NUMENTRIES_water] =
 
   
   G4VPhysicalVolume *physDome = new G4PVPlacement(0,
-                                                  G4ThreeVector(0.,0.,-248.4*mm),
+                                                  G4ThreeVector(0.,0.,-271.9*mm),
                                                   domeLogic,
                                                   "physDome",
                                                   logicInSitumPMT,
@@ -669,7 +671,8 @@ G4double Matrix_ref[NUMENTRIES_water] =
                                                        "flangeLogic");
   
   G4VPhysicalVolume *physCylinder = new G4PVPlacement(0,
-						      G4ThreeVector(0.,0.,-91.185*mm),
+						      //G4ThreeVector(0.,0.,-91.185*mm),
+						      G4ThreeVector(0.,0.,-114.685*mm),
 						      cylinderLogic,
 						      "physCylinder",
 						      logicInSitumPMT,
